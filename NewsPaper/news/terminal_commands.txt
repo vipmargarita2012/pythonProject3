@@ -1,0 +1,170 @@
+>>> from news.models import *
+>>> u1 = User.objects.create_user(username='Petr')
+>>> u2 = User.objects.create_user(username='Ivan')
+>>> u2
+<User: Ivan>
+>>> Author.objects.create(authorUser=u1)
+<Author: Author object (1)>
+>>> Author.objects.create(authorUser=u2)
+<Author: Author object (2)>
+>>> Category.objects.create(name = 'Nature')
+<Category: Category object (1)>
+>>> Category.objects.create(name = 'Science')
+<Category: Category object (2)>
+>>> Category.objects.create(name = 'Beauty')
+<Category: Category object (3)>
+>>> Category.objects.create('Health')
+
+>>> Category.objects.create(name = 'Health')
+<Category: Category object (4)>
+>>> author = Author.objects.get(id = 1)
+>>> author
+<Author: Author object (1)>
+>>> Post.objects.create(author = author, categoryType = 'NW',postCategory = 'Nature', title = 'Sometitle',text = 'sometext')
+
+>>> Post.objects.create(author = author, categoryType = 'NW',postCategory = 'Nature', title = 'Sometitle',text = 'sometext')
+
+>>> Post.objects.create(author = author, categoryType = 'NW', title = 'sometitle', text = 'sometext')
+<Post: Post object (1)>
+>>> Post.objects.create(author = author, categoryType = 'NW', title = 'sometitle', text = 'sometext')
+<Post: Post object (2)>
+>>> Post.objects.create(author = author, categoryType = 'AR', title = 'sometitle', text = 'sometext')
+<Post: Post object (3)>
+>>> Post.objects.create(author = author, categoryType = 'AR', title = 'sometitle', text = 'somebigtext')
+<Post: Post object (4)>
+>>> Post.objects.get(id=1).postCategory.set(id = 4)
+
+>>> Post.objects.get(id=1).postCategory.add(Category.objects.get(id=1))
+>>> Post.objects.get(id=1).postCategory.add(Category.object.get(id=2))
+
+>>> Post.objects.get(id=1).postCategory.add(Category.objects.get(id=2))
+>>> Post.objects.get(id=2).postCategory.add(Category.objects.get(id=3))
+>>> Post.objects.get(id=2).postCategory.add(Category.objects.get(id=4))
+>>> Post.objects.get(id=3).postCategory.add(Category.objects.get(id=1))
+>>> Post.objects.get(id=3).postCategory.add(Category.objects.get(id=2))
+>>> Post.objects.get(id=4).postCategory.add(Category.objects.get(id=4))
+>>> Post.objects.get(id=4).postCategory.add(Category.objects.get(id=3))
+
+
+
+____________________________________
+
+>>> Post.objects.get(id=1).like()
+>>> Post.objects.get(id=2).like()
+>>> Post.objects.get(id=1).like()
+>>> Post.objects.get(id=3).like()
+>>> Post.objects.get(id=1).like()
+>>> Post.objects.get(id=4).dislike()
+>>> Post.objects.get(id=1).rating()
+
+>>> Post.objects.get(id=1).rating
+3
+>>> Post.objects.get(id=4).rating
+-1
+>>>
+>>> Author.objects.get(id=1).update_rating()
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\NewsPaper\news\models.py", line 16, in update_rating
+    cRat += commentRat.get('commentRating')
+TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+>>> a = Author.objects.get(id=1)
+>>> a.update_rating()
+
+>>> Comment.objects.create(commentPost=Post.objects.get(id=1),commentUser=Author.objects.get(id=1).authorUser, text='anytext')
+<Comment: Comment object (1)>
+>>> Comment.objects.create(commentPost=Post.objects.get(id=2),commentUser=Author.objects.get(id=2).authorUser, text='anytext')
+<Comment: Comment object (2)>
+>>> Comment.objects.create(commentPost=Post.objects.get(id=3),commentUser=Author.objects.get(id=1).authorUser, text='anytext')
+<Comment: Comment object (3)>
+>>> Comment.objects.create(commentPost=Post.objects.get(id=4),commentUser=Author.objects.get(id=2).authorUser, text='anytext')
+<Comment: Comment object (4)>
+>>> Comment.objects.create(commentPost=Post.objects.get(id=1),commentUser=Author.objects.get(id=1).authorUser, text='anybanytext')
+<Comment: Comment object (5)>
+>>> Author.objects.get(id=1)
+<Author: Author object (1)>
+>>> a = Author.objects.get(id=1).update_rating()
+>>> a = Author.objects.get(id=1)
+>>> a.update_rating()
+>>> a.rating
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+AttributeError: 'Author' object has no attribute 'rating'
+>>> a.ratingAuthor
+12
+>>> Author.objects.all().update_rating()
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+AttributeError: 'QuerySet' object has no attribute 'update_rating'
+>>> b=Author.objects.get(id=2)
+>>> b.update_rating()
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\NewsPaper\news\models.py", line 12, in update_rating
+    pRat += postRat.get('postRating')
+TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+>>> b.ratigAuthor
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+AttributeError: 'Author' object has no attribute 'ratigAuthor'
+>>> b = Author.objects.get(id=2)
+>>> b.update_rating()
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\NewsPaper\news\models.py", line 12, in update_rating
+    pRat += postRat.get('postRating')
+TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+>>> b = Author.objects.get(id=4)
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\venv\lib\site-packages\django\db\models\manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\venv\lib\site-packages\django\db\models\query.py", line 496, in get
+    raise self.model.DoesNotExist(
+news.models.Author.DoesNotExist: Author matching query does not exist.
+>>> Author.objects.get(id=2).ratingAuthor
+0
+>>> Comment.objects.get(id=1).like()
+>>> Comment.objects.get(id=2).like()
+>>> Comment.objects.get(id=3).like()
+>>> Comment.objects.get(id=1).dislike()
+>>> Author.objects.get(id=2).ratingAuthor
+0
+>>> b = Author.objects.get(id=2)
+>>> b.update_rating()
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\NewsPaper\news\models.py", line 12, in update_rating
+    pRat += postRat.get('postRating')
+TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'
+>>>
+KeyboardInterrupt
+>>> author2 = Author.objects.get(id = 2)
+>>> Post.objects.create(author = author2, categoryType = 'AR', title = 'sometitle', text = 'sometext')
+<Post: Post object (5)>
+>>> b = Author.objects.get(id=2)
+>>> b.update_rating()
+>>> b.ratingAuthor
+1
+>>> Author.objects.order_by(-raitingAuthor)[:2]
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+NameError: name 'raitingAuthor' is not defined
+>>> Author.objects.order_by('-raitingAuthor')[:2]
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\venv\lib\site-packages\django\db\models\manager.py", line 85, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\venv\lib\site-packages\django\db\models\query.py", line 1295, in order_by
+    obj.query.add_ordering(*field_names)
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\venv\lib\site-packages\django\db\models\sql\query.py", line 2167, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "C:\Users\vipma\PycharmProjects\pythonProject3\venv\lib\site-packages\django\db\models\sql\query.py", line 1677, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'raitingAuthor' into field. Choices are: authorUser, authorUser_id, id, post, ratingAuthor
+>>> Author.objects.order_by('-ratingAuthor')[:2]
+<QuerySet [<Author: Author object (1)>, <Author: Author object (2)>]>
+
+>>> best_post=Post.objects.all().order_by('-rating').values('dateCreation','author_id','rating','title')[0]
+>>> best_post
+{'dateCreation': datetime.datetime(2022, 8, 4, 10, 31, 7, 75555, tzinfo=datetime.timezone.utc), 'author_id': 1, 'rating': 3, 'title': 'sometitle'}
