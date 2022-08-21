@@ -24,4 +24,5 @@ admin.site.register(FlatPage, FlatPageAdmin)
 admin.site.register(Post)
 
 
+
 # Register your models here.
