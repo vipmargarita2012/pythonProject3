@@ -2,12 +2,13 @@ from datetime import datetime
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import (
-    ListView, DetailView, CreateView,  UpdateView, DeleteView
+    ListView, DetailView, CreateView,  UpdateView, DeleteView,
 )
-from .models import Post
+from .models import Post, Author
 from .filters import PostFilter
-from .forms import PostForm
+from .forms import PostForm, ProfileAuthorForm
 
 
 class PostList(ListView):
@@ -55,22 +56,20 @@ class PostDetail(DetailView):
     context_object_name = 'post'
 
 
-class PostCreate(CreateView):
+class PostCreate(PermissionRequiredMixin, CreateView):
     # Указываем нашу разработанную форму
     form_class = PostForm
     model = Post
     # и новый шаблон, в котором используется форма.
     template_name = 'post_edit.html'
+    success_url = '/news/'
+    permission_required = ('news.add_post')
 
-    def create_post(request):
-        form = PostForm()
 
-        if request.method == 'POST':
-            form = PostForm(request.POST)
-            if form.is_valid():
-                return HttpResponseRedirect('/posts/')
-
-        return render(request, 'post_edit.html', {'form': form})
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.author = Author.objects.get(authorUser=self.request.user)
+        return super().form_valid(form)
 
 
 class PostUpdate(UpdateView):
@@ -84,3 +83,12 @@ class PostDelete(DeleteView):
     model = Post
     template_name = 'post_delete.html'
     success_url = reverse_lazy('post_list')
+
+
+class ProfileAuthorUpdate(LoginRequiredMixin, UpdateView):
+    form_class = ProfileAuthorForm
+    model = Author
+    template_name = 'edit_profile.html'
+    success_url = reverse_lazy('post_list')
+
+

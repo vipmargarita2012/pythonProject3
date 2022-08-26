@@ -1,8 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from .models import Post
-
+from .models import Post, Author
 
 class PostForm(forms.ModelForm):
     description = forms.CharField(min_length=20)
@@ -21,3 +20,9 @@ class PostForm(forms.ModelForm):
                 "Название должно начинаться с заглавной буквы"
             )
         return title
+
+
+class ProfileAuthorForm(forms.ModelForm):
+    class Meta:
+        model = Author
+        fields = ['authorUser']
