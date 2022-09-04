@@ -55,8 +55,10 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'subscribers',
+    'django_apscheduler',
+    # 'news.apps.NewsConfig',
 ]
-
 
 SITE_ID = 1
 
@@ -88,6 +90,8 @@ TEMPLATES = [
         },
     },
 ]
+
+
 
 WSGI_APPLICATION = 'NewsPaper.wsgi.application'
 
@@ -139,7 +143,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 # LOGIN_URL = 'sign/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/posts/'
 LOGIN_URL = '/accounts/login/'
 
 # Default primary key field type
@@ -153,7 +157,23 @@ STATICFILES_DIRS = [
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTIFICATION_METHOD = 'email'
+# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_FORMS = {'signup': 'sign.models.CommonSignupForm'}
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'ivanova.snowqueen2017'
+EMAIL_HOST_PASSWORD = '0987Poiuy'
+EMAIL_USE_SSL = True
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+SERVER_EMAIL = 'ivanova.snowqueen2017@yandex.ru'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER + '@yandex.ru'
+# 'ivanova.snowqueen2017@yandex.ru'
+
+# формат даты, которую будет воспринимать наш задачник (вспоминаем модуль по фильтрам)
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+
+# если задача не выполняется за 25 секунд, то она автоматически снимается, можно больше, но будет медленно работать
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds

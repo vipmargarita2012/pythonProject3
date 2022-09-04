@@ -1,20 +1,18 @@
 <!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
 {% extends 'flatpages/default.html' %}
-
 <!-- Название у нас будет Post -->
 {% block title %}
-Post
+Categories
 {% endblock title %}
 
 <!-- В контенте на странице мы выводим сам товар, идентификатор которого был передан в url -->
 {% block content %}
-<h1><strong>{{ post.title }}</strong></h1><br>
-<h4>Дата публикации: {{ post.dateCreation|date:'d F Y'}}</h4>
-<h4>Автор: {{ post.author}}</h4>
-<h5>Разделы:
-{% for elem_category in post.categories %}
-    <td>{{ elem_category.name }}</td>
-{% endfor %}
-</h5>
-<p>Текст: {{ post.text }}</p>
+<h1><strong>Разделы:</strong></h1><br>
+    <table>
+        {% for elem in cats %}
+        <tr>
+           <a href="{% url 'category_detail' pk=elem.pk %}"> {{ elem.name }}</a><br>
+       </tr>
+       {% endfor %}
+   </table>
 {% endblock content %}

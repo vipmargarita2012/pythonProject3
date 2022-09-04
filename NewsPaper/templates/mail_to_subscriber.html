@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <p> Здравствуй, {{ username }}</p>
+    <p> Новая статья в твоем любимом разделе! </p><br>
+    <h1>{{ title }}</h1>
+    <p>{{ text|truncatechars:50 }}</p>
+<!--    <a href="{% url 'post_detail' pk=post_id %}">Читать далее...</a>>-->
+    <a href="http://127.0.0.1:8000/posts/{{ post_id }}">Читать далее...</a>>
+</body>
+</html>

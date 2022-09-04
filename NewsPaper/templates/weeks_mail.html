@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дайджест новостей за неделю</title>
+</head>
+<body>
+    <p>Здравствуйте, {{ username }}</p>
+    <p>Дайджест новостей за неделю по вашим разделам</p><br>
+    {% for post in posts %}
+    <h1>{{ post.title }}</h1>
+    <p>{{ post.text|truncatechars:50 }}</p>
+<!--    <a href="{% url 'post_detail' pk=post.pk %}"> {{ post.title }}</a><br>-->
+    <a href="http://127.0.0.1:8000/posts/{{ post.pk }}">Читать далее...</a>>
+    {% endfor %}
+
+</body>
+</html>

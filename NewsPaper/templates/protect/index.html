@@ -4,6 +4,8 @@
 <h2>Страница авторизованного пользователя {{request.user.username}}</h2>
 <div> Здесь может содержаться персональная информация для каждого пользователя </div>
 
+<button> <a href="posts/">Все статьи</a> </button>
+
 {% if is_not_author %}
 <button> <a href="sign/upgrade/"> Стать автором</a> </button>
 {% endif %}

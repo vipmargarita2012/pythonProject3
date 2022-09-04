@@ -22,13 +22,24 @@ class Author(models.Model):
         self.ratingAuthor = pRat * 3 + cRat
         self.save()
 
+
+
 class Category(models.Model):
     name = models.CharField(max_length=64, unique=True)
+    subscribers = models.ManyToManyField(User, through='CategorySubscribers')
+    # subscriber = models.ManyToManyField(User, through='CategorySubscribers', blank=True, )
 
     def __str__(self):
         return f'{self.name}'
 
 
+class CategorySubscribers(models.Model):
+    # subscriber = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("category", "user")
 
 class Post(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
@@ -45,6 +56,11 @@ class Post(models.Model):
     title = models.CharField(max_length=128)
     text = models.TextField()
     rating = models.SmallIntegerField(default=0)
+    isUpdated = models.BooleanField(default=False)
+
+    @property
+    def categories(self):
+        return self.postCategory.all().values("name")
 
     def __str__(self):
         return f'{self.title} {self.dateCreation} {self.text}'
