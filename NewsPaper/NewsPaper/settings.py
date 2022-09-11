@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+env = load_dotenv()  # take environment variables from .env.
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'news',
+    # 'news',
     'accounts',
     'django.contrib.sites',
     'django.contrib.flatpages',
@@ -57,7 +60,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'subscribers',
     'django_apscheduler',
-    # 'news.apps.NewsConfig',
+    'news.apps.NewsConfig',
 ]
 
 SITE_ID = 1
@@ -131,7 +134,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -164,16 +167,24 @@ ACCOUNT_FORMS = {'signup': 'sign.models.CommonSignupForm'}
 
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'ivanova.snowqueen2017'
-EMAIL_HOST_PASSWORD = '0987Poiuy'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+SERVER_EMAIL = os.getenv('SERVER_EMAIL')
 EMAIL_USE_SSL = True
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-SERVER_EMAIL = 'ivanova.snowqueen2017@yandex.ru'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER + '@yandex.ru'
-# 'ivanova.snowqueen2017@yandex.ru'
 
 # формат даты, которую будет воспринимать наш задачник (вспоминаем модуль по фильтрам)
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 
 # если задача не выполняется за 25 секунд, то она автоматически снимается, можно больше, но будет медленно работать
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
+
+CELERY_ENABLE_UTC = False
+CELERY_TIME_ZONE = TIME_ZONE
+CELERY_BROKER_URL = 'redis://localhost:6379'
+#указывает на URL брокера сообщений (Redis). По умолчанию он находится на порту 6379.
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'#указывает на хранилище результатов выполнения задач
+CELERY_ACCEPT_CONTENT = ['application/json']#допустимый формат данных
+CELERY_TASK_SERIALIZER = 'json'#метод сериализации задач
+CELERY_RESULT_SERIALIZER = 'json' #метод сериализации результатов

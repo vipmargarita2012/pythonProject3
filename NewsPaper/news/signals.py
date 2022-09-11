@@ -39,3 +39,4 @@ def notify_subscribers_post(sender, instance, created, **kwargs):
         subject = f'{instance.title} {instance.dateCreation.strftime("%d %m %Y")}'
     else:
         subject = f'Post changed for {instance.title} {instance.dateCreation.strftime("%d %m %Y")}'
+
