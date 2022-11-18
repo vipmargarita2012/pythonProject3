@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import logging
+
+logger = logging.getLogger(('project.app.news'))
 
 env = load_dotenv()  # take environment variables from .env.
 
@@ -28,6 +31,145 @@ SECRET_KEY = 'django-insecure-k6c7c@ho)wp74-(q$6(@e5df*$wb4+9usk)h%h9k188h*prdug
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False, #отключать ли существующие настройки
+    'formatters': {
+        #info format
+        'i_format': {
+            'style': '{','format':
+            '{asctime} | {levelname} | {modul} | {message}',
+        },
+        #debug format
+        'd_format': {
+            'style': '{',
+            'datetime': '%Y.%m.%d %H: %M %S',
+            'format':
+            '{asctime} | {levelname} | {message}',
+        },
+        #warning format
+        'w_format': {
+            'style': '{',
+            'datetime': '%Y.%m.%d %H: %M %S',
+            'format':
+            '{asctime} | {levelname} | {pathname} | {message}',
+        },
+        #error and critical format
+        'e_c_format': {
+            'style': '{',
+            'datetime': '%Y.%m.%d %H: %M %S',
+            'format':
+            '{asctime} | {levelname} | {pathname} | {exc_info} | {message}',
+        },
+        #mail format
+        'mail_format': {
+            'style': '{',
+            'datetime': '%Y.%m.%d %H: %M %S',
+            'format':
+            '{asctime} | {levelname} | {pathname} | {message}',
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()':
+                'django.utils.log.RequireDebugFalse'#if debug=false in settings.py
+            },
+         'require_debug_true': {
+             '()':
+                 'django.utils.log.RequireDebugTrue'#if debug=true in settings.py
+            },
+        },
+    'handlers': {
+        'console_i': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'i_format',
+            },
+        'console_d': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'd_format',
+        },
+        'console_w': {
+            'level': 'WARNING',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'w_format',
+        },
+        'console_e_c': {
+            'level': 'ERROR',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'e_c_format',
+        },
+        'general_log': {
+            'level': 'INFO',
+            'filters': ['require_debug_false'],
+            'class': 'logging.FileHandler',
+            'formatter': 'i_format',
+        },
+        'error_log': {
+            'level': 'ERROR',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': 'logs/error.log',
+            'formatter': 'e_c_format',
+        },
+        'security_log': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.FileHandler',
+            'filename': 'logs/security.log',
+            'formatter': 'i_format',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_true'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'mail_format',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console_i', 'general_log'],
+            'level': 'DEBUG',
+        },
+        'console_debug': {
+            'handlers': ['console_d'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'console_warning': {
+            'handlers': ['console_w'],
+            'level': 'WARNING',
+            'propagate': False,
+         },
+        'console_e_c': {
+            'handlers': ['console_e_c'],
+            'level':'ERROR',
+            'propagate': False,
+         },
+        'file_general': {
+            'handlers': ['error_log','mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db_backends': {
+            'handlers': ['error_log'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['security_log'],
+            'level': 'INFO',
+            'propagate': False,
+         },
+    },
+}
+
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -74,7 +216,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
 ]
+
 
 ROOT_URLCONF = 'NewsPaper.urls'
 
@@ -94,7 +240,13 @@ TEMPLATES = [
     },
 ]
 
-
+CACHES = {
+    'default': {
+        'TIMEOUT': 60,
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(BASE_DIR, 'cache_files'),  # Указываем, куда будем сохранять кэшируемые файлы
+    }
+}
 
 WSGI_APPLICATION = 'NewsPaper.wsgi.application'
 
@@ -181,10 +333,11 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
 
 CELERY_ENABLE_UTC = False
-CELERY_TIME_ZONE = TIME_ZONE
+CELERY_TIMEZONE = TIME_ZONE
 CELERY_BROKER_URL = 'redis://localhost:6379'
 #указывает на URL брокера сообщений (Redis). По умолчанию он находится на порту 6379.
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'#указывает на хранилище результатов выполнения задач
 CELERY_ACCEPT_CONTENT = ['application/json']#допустимый формат данных
 CELERY_TASK_SERIALIZER = 'json'#метод сериализации задач
 CELERY_RESULT_SERIALIZER = 'json' #метод сериализации результатов
+
