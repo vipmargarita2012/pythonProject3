@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, reverse, redirect
@@ -16,6 +17,16 @@ from django.contrib.auth.decorators import login_required
 from django.db.models.signals import post_save, m2m_changed
 from .signals import notify_subscribers_post, categories_changed
 from django.contrib import messages
+from django.core.cache import cache  # импортируем наш кэш
+
+logger = logging.getLogger('__name__')
+
+
+def index(request):
+    logger.info('INFO')
+    news = News.objects.all()
+    return render(request, 'index.html', context={'news': news})
+
 
 class CategoryList(ListView):
     model = Category
@@ -74,12 +85,24 @@ class PostDetail(DetailView):
     template_name = 'post.html'
     # Название объекта, в котором будет выбранный post
     context_object_name = 'post'
+    queryset = Post.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['is_not_subscribers'] = not self.request.user.groups.filter(name='subscribers').exists()
         context['is_subscribers'] = self.request.user.groups.filter(name='subscribers').exists()
         return context
+
+
+    def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта, как ни странно
+        obj = cache.get(f'post-{self.kwargs["pk"]}', None)  # кэш очень похож на словарь, и метод get действует так же
+        # Он забирает значение по ключу, если его нет, то забирает None.
+        # если объекта нет в кэше, то получаем его и записываем в кэш
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'product-{self.kwargs["pk"]}', obj)
+        return obj
+
 
 class Category(DetailView):
     model = Category

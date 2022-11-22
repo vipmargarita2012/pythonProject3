@@ -15,7 +15,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import logging
 
-logger = logging.getLogger(('project.app.news'))
+logger = logging.getLogger('django')
 
 env = load_dotenv()  # take environment variables from .env.
 
@@ -36,139 +36,112 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False, #отключать ли существующие настройки
     'formatters': {
-        #info format
-        'i_format': {
-            'style': '{','format':
-            '{asctime} | {levelname} | {modul} | {message}',
-        },
-        #debug format
-        'd_format': {
+        'i_formatter': {
+            'format': '{asctime} {levelname} {module} {message}',
+            'datetime': '%Y. %d. %m. %H:%M:%S',
             'style': '{',
-            'datetime': '%Y.%m.%d %H: %M %S',
-            'format':
-            '{asctime} | {levelname} | {message}',
         },
-        #warning format
-        'w_format': {
+        'd_formatter': {
+            'format': '{asctime} {levelname} {message}',
+            'datetime': '%Y. %d. %m. %H:%M:%S',
             'style': '{',
-            'datetime': '%Y.%m.%d %H: %M %S',
-            'format':
-            '{asctime} | {levelname} | {pathname} | {message}',
         },
-        #error and critical format
-        'e_c_format': {
+        'w_formatter': {
+            'format': '{asctime} {levelname} {message} {pathname}',
+            'datetime': '%Y. %d. %m. %H:%M:%S',
             'style': '{',
-            'datetime': '%Y.%m.%d %H: %M %S',
-            'format':
-            '{asctime} | {levelname} | {pathname} | {exc_info} | {message}',
         },
-        #mail format
-        'mail_format': {
+        'e_c_formatter': {
+            'format': '{asctime} {levelname} {message} {exc_info}',
+            'datetime': '%Y. %d. %m. %H:%M:%S',
             'style': '{',
-            'datetime': '%Y.%m.%d %H: %M %S',
-            'format':
-            '{asctime} | {levelname} | {pathname} | {message}',
+        },
+        's_formatter': {
+            'format': '{asctime} {levelname} {module} {message}',
+            'datetime': '%Y. %d. %m. %H:%M:%S',
+            'style': '{',
+        },
+        'mail_formatter': {
+            'format': '{asctime} {levelname} {message}',
+            'datetime': '%Y. %d. %m. %H:%M:%S',
+            'style': '{',
         },
     },
     'filters': {
         'require_debug_false': {
-            '()':
-                'django.utils.log.RequireDebugFalse'#if debug=false in settings.py
+            '()': 'django.utils.log.RequireDebugFalse'#if debug=false in settings.py
             },
-         'require_debug_true': {
-             '()':
-                 'django.utils.log.RequireDebugTrue'#if debug=true in settings.py
+        'require_debug_true': {
+             '()': 'django.utils.log.RequireDebugTrue'#if debug=true in settings.py
             },
-        },
+    },
     'handlers': {
-        'console_i': {
-            'level': 'INFO',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'i_format',
-            },
-        'console_d': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'd_format',
-        },
-        'console_w': {
-            'level': 'WARNING',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'w_format',
-        },
-        'console_e_c': {
-            'level': 'ERROR',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'e_c_format',
-        },
-        'general_log': {
+        # 'console': {
+        #     'level': 'DEBUG',
+        #     'filters': ['require_debug_true'],
+        #     'class': 'logging.StreamHandler',
+        #     'formatter': 'd_formatter',
+        # },
+        'i_file': {
             'level': 'INFO',
             'filters': ['require_debug_false'],
             'class': 'logging.FileHandler',
-            'formatter': 'i_format',
+            'filename': 'NewsPaper/general.log',
+            'formatter': 'i_formatter',
         },
-        'error_log': {
+        'e_c_file': {
             'level': 'ERROR',
-            'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': 'logs/error.log',
-            'formatter': 'e_c_format',
+            'filename': 'NewsPaper/errors.log',
+            'formatter': 'e_c_formatter',
         },
-        'security_log': {
+        's_file': {
             'level': 'INFO',
-            'filters': ['require_debug_true'],
             'class': 'logging.FileHandler',
-            'filename': 'logs/security.log',
-            'formatter': 'i_format',
+            'filename': 'NewsPaper/security.log',
+            'formatter': 's_formatter',
         },
         'mail_admins': {
             'level': 'ERROR',
-            'filters': ['require_debug_true'],
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
-            'formatter': 'mail_format',
+            'formatter': 'mail_formatter',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console_i', 'general_log'],
-            'level': 'DEBUG',
+            'handlers': ['i_file'],
+            'level': 'INFO',
+            'propagate': True,
         },
-        'console_debug': {
-            'handlers': ['console_d'],
-            'level': 'DEBUG',
+        'django.request': {
+            'handlers': ['e_c_file', 'mail_admins'],
+            'level': 'ERROR',
             'propagate': False,
         },
-        'console_warning': {
-            'handlers': ['console_w'],
-            'level': 'WARNING',
+        ' django.server': {
+            'handlers': ['e_c_file', 'mail_admins'],
+            'level': 'ERROR',
             'propagate': False,
-         },
-        'console_e_c': {
-            'handlers': ['console_e_c'],
-            'level':'ERROR',
-            'propagate': False,
-         },
-        'file_general': {
-            'handlers': ['error_log','mail_admins'],
+        },
+        'django.template': {
+            'handlers': ['e_c_file'],
             'level': 'ERROR',
             'propagate': False,
         },
         'django.db_backends': {
-            'handlers': ['error_log'],
+            'handlers': ['e_c_file'],
             'level': 'ERROR',
             'propagate': False,
         },
         'django.security': {
-            'handlers': ['security_log'],
+            'handlers': ['s_file'],
             'level': 'INFO',
             'propagate': False,
-         },
+        },
     },
 }
+
 
 
 ALLOWED_HOSTS = ['127.0.0.1']
